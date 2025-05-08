@@ -19,10 +19,22 @@ COPY application/templates /www/templates
 # Python dependencies
 RUN python3 -m pip install -r requirements-production.txt
 
-COPY .git/HEAD /tmp/.git/HEAD
-COPY .git/refs/ /tmp/.git/refs/
-RUN /bin/bash -c '(cat /tmp/.git/$(cat /tmp/.git/HEAD | cut -d \  -f 2)) || cat /tmp/.git/HEAD' > /version
+# comenta las siguientes líneas para uso de render.com
+#COPY .git/HEAD /tmp/.git/HEAD
+#COPY .git/refs/ /tmp/.git/refs/
+#RUN /bin/bash -c '(cat /tmp/.git/$(cat /tmp/.git/HEAD | cut -d \  -f 2)) || cat /tmp/.git/HEAD' > /version
+#RUN sed -i "4i<script>console.log('pipeline version: $(cat /version)');</script>" /www/templates/*.html
+
+#Reemplázalas con una instrucción que cree un archivo /version vacío o con un valor predeterminado
+RUN echo "unknown" > /version
+
+# Reemplaza las líneas problemáticas con una instrucción que use una variable
+# Agrega esta línea:
+#ARG COMMIT_HASH=unknown
+ARG COMMIT_HASH=4d26c33f79a2b67bd86d9f3f48d1ee7e8333c625
+RUN echo "$COMMIT_HASH" > /version
 RUN sed -i "4i<script>console.log('pipeline version: $(cat /version)');</script>" /www/templates/*.html
+
 RUN rm -rf /tmp/.git
 
 COPY application/static /www/static/
